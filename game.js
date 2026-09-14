@@ -10,7 +10,7 @@
 
   const levels = [
     {
-      id: 'alley', icon: '木', name: '后巷木桌', unlock: 0, buyIn: 30, blind: 1, difficulty: .08, mercy: .52,
+      id: 'alley', icon: '木', name: '后巷木桌', unlock: 0, buyIn: 30, blind: 1, difficulty: .08, grace: .52,
       scene: '滴水的空调外机、垃圾桶和破损木线轴。这里的牌局像街头斗殴一样直接。',
       opponents: [
         { name:'秃顶大汉', avatar:'壮', style:'直线蛮打', aggression:.42, looseness:.72, quote:'别磨蹭，小子，快下注。' },
@@ -19,7 +19,7 @@
       lose: '后巷的灯泡灭了。你被按在垃圾桶旁，口袋比来时更空。'
     },
     {
-      id: 'bar', icon: '酒', name: '街角酒馆', unlock: 150, buyIn: 70, blind: 4, difficulty: .18, mercy: .34,
+      id: 'bar', icon: '酒', name: '街角酒馆', unlock: 150, buyIn: 70, blind: 4, difficulty: .18, grace: .34,
       scene: '廉价酒吧里霓虹灯牌忽明忽暗，点唱机只剩电流杂音。',
       opponents: [
         { name:'卡车司机', avatar:'卡', style:'疲惫跟注站', aggression:.32, looseness:.62, quote:'再来一杯，还有一手好牌。' },
@@ -28,7 +28,7 @@
       lose: '酒馆门口的雨水冲走你的筹码。没人记得你来过。'
     },
     {
-      id: 'arcade', icon: '机', name: '地下游戏厅', unlock: 300, buyIn: 125, blind: 8, difficulty: .32,
+      id: 'arcade', icon: '机', name: '地下游戏厅', unlock: 300, buyIn: 125, blind: 8, difficulty: .32, grace: .24,
       scene: '老式街机屏幕发出绿色荧光，筹码和游戏代币混在一起。',
       opponents: [
         { name:'棒球帽游戏宅', avatar:'帽', style:'概率派', aggression:.47, looseness:.38, quote:'这个游戏的概率，我比德州扑克算得还清楚。' },
@@ -37,7 +37,7 @@
       lose: '街机屏幕显示 CONTINUE? 你的口袋没有硬币。'
     },
     {
-      id: 'tea', icon: '茶', name: '中国城茶馆', unlock: 650, buyIn: 260, blind: 20, difficulty: .52,
+      id: 'tea', icon: '茶', name: '中国城茶馆', unlock: 650, buyIn: 260, blind: 20, difficulty: .52, grace: .16,
       scene: '古旧茶馆后厅，屏风和茶香掩不住牌桌上的寒意。',
       opponents: [
         { name:'老掌柜', avatar:'掌', style:'慢压价值', aggression:.36, looseness:.26, quote:'茶要慢慢品，牌要慢慢打。' },
@@ -46,7 +46,7 @@
       lose: '你被茶馆后门请出去，身上只剩一股凉掉的茶味。'
     },
     {
-      id: 'ktv', icon: '歌', name: 'KTV豪华包厢', unlock: 1200, buyIn: 500, blind: 40, difficulty: .63,
+      id: 'ktv', icon: '歌', name: 'KTV豪华包厢', unlock: 1200, buyIn: 500, blind: 40, difficulty: .63, grace: .10,
       scene: '巨大屏幕无声播放老MV，皮革沙发散着烟酒味。',
       opponents: [
         { name:'房地产销售', avatar:'楼', style:'酒后疯狗', aggression:.72, looseness:.68, quote:'赢了钱，今晚全场消费我买单！' },
@@ -55,7 +55,7 @@
       lose: '包厢里的笑声压过你的呼吸。账单被推到你面前。'
     },
     {
-      id: 'office', icon: '金', name: '摩天大楼办公室', unlock: 2200, buyIn: 900, blind: 80, difficulty: .76,
+      id: 'office', icon: '金', name: '摩天大楼办公室', unlock: 2200, buyIn: 900, blind: 80, difficulty: .76, grace: .05,
       scene: '顶层CEO办公室，城市夜景在落地窗外像一张冰冷的牌面。',
       opponents: [
         { name:'金融精英', avatar:'融', style:'风险模型', aggression:.61, looseness:.24, quote:'在这里，我们计算风险，也计算人心。' },
@@ -64,7 +64,7 @@
       lose: '电梯下行时，你看见玻璃里的自己像一张弃牌。'
     },
     {
-      id: 'yacht', icon: '船', name: '私人游轮', unlock: 4500, buyIn: 1800, blind: 160, difficulty: .98, cheat: true,
+      id: 'yacht', icon: '船', name: '私人游轮', unlock: 4500, buyIn: 1800, blind: 160, difficulty: .98, grace: 0, cheat: true,
       scene: '驶入公海的豪华游轮。月光照在甲板上，也照在无法证明的作弊上。',
       opponents: [
         { name:'面具庄家', avatar:'面', style:'规则制定者', aggression:.68, looseness:.16, quote:'欢迎来到终点，年轻人。规则由我制定。' },
@@ -575,15 +575,16 @@
     if (type === 'fold') {
       h.playerActive = false;
       addLog(choice(['你把牌扣下。活着离桌，有时也是一种胜利。','你松开牌角，让这手牌死在桌面上。','你没有逞强，筹码还会说下一句话。']));
-      if (toCall >= level.blind * 3) state.insight += 1;
       return resolveFold();
     }
     if (type === 'call') {
       const paid = payPlayer(toCall);
+      if (toCall >= level.blind * 3) state.insight += 1;   // 破局值：面对大注不退缩（原版是弃牌才给分）
       addLog(paid ? choice([`你跟注 ${money(paid)}。`,`你把 ${money(paid)} 推进底池。`,`你补齐价格，继续看这座城市怎么发牌。`]) : choice(['你敲了敲桌面，过牌。','你没有下注，只让沉默继续。','你用指节点了点桌面。']));
     }
     if (type === 'raise') {
       const raise = Math.min(h.playerStack, Math.max(level.blind * (h.street + 2), Math.floor(level.buyIn * (.08 + h.street * .03))));
+      if (toCall >= level.blind * 3) state.insight += 1;   // 破局值：面对大注加注（原版是弃牌才给分）
       const paid = payPlayer(toCall + raise);
       h.currentBet = h.playerContrib;
       addLog(choice([`你把一摞筹码推过线：${money(paid)}。`,`你提高价格：${money(paid)}，桌面像被敲了一记。`,`你选择主动开火，下注 ${money(paid)}。`]), 'gold');
@@ -605,6 +606,7 @@
     const loss = level.buyIn - h.playerStack;
     state.bankroll = Math.max(0, state.bankroll - loss);
     addLog(`你损失 ${money(loss)}，带着剩余筹码离桌。`, 'bad');
+    h.pot = 0;                      // 弃牌后底池归零，否则界面会一直挂着残留底池
     h.resolved = true;
     h.showdown = false;
     finishBankrollCheck(false);
@@ -649,32 +651,43 @@
   function opponentDecision(o, strength, toCall, alreadyRaised) {
     const h = state.hand;
     const level = levels[h.levelIndex];
-    const pressure = toCall / Math.max(1, level.buyIn);
+    // 压力：以买入为分母，再经饱和映射，避免大注把阈值顶穿上限（原版会在全压时饱和到 .92）
+    const raw = toCall / Math.max(1, level.buyIn);
+    const pressure = raw / (raw + .30);
     const streetWeight = h.street / 3;
     const made = h.community.length >= 3 ? evaluate7([...o.cards, ...h.community]).category : 0;
     const strongMade = made >= 2 || strength > .68;
-    const nutted = made >= 5 || strength > .84;
+    const nutted = made >= 5 || strength > .76;
     const chaos = (Math.random() - .5) * (o.tilt || 0) * .26;
     const effectiveStrength = clamp(strength + chaos, 0, .99);
 
-    const mercy = level.mercy || 0;
-    const foldBoost = mercy && toCall > 0 ? .10 * mercy : 0;
-    const raiseBrake = 1 - (.52 * mercy);
-    const bluffBrake = 1 - (.55 * mercy);
-    const foldThreshold = clamp(.18 + foldBoost + pressure * (1.05 + o.tight) - o.call * .28 - (strongMade ? .22 : 0), .04, .92);
-    const bluffWindow = !strongMade && Math.random() < (o.bluff * bluffBrake * (1 - streetWeight * .25));
+    const grace = level.grace || 0;
+    const foldBoost = grace && toCall > 0 ? .10 * grace : 0;
+    const raiseBrake = 1 - (.52 * grace);
+    const bluffBrake = 1 - (.55 * grace);
+    // 弃牌门槛：基准 + 新手缓冲 + 压力项（饱和）+ 牌力线性折扣
+    const foldThreshold = clamp(
+      .16 + foldBoost
+      + pressure * (.95 + o.tight * .45)
+      - o.call * .26
+      - effectiveStrength * .52,
+      .04, .95);
+    const bluffWindow = !strongMade && Math.random() < (o.bluff * bluffBrake * (.70 + level.difficulty * .60) * (1 - streetWeight * .25));
     const trapWindow = strongMade && Math.random() < (o.trap * (.65 + streetWeight * .5));
-    const pressureWindow = Math.random() < (o.pressure * raiseBrake * (.34 + effectiveStrength * .55));
-    const preflopBrake = mercy > 0 && h.street === 0 && !nutted && made < 1;
+    const pressureWindow = Math.random() < (o.pressure * raiseBrake * (.30 + level.difficulty * .35 + effectiveStrength * .55));
+    // 翻前刹车只保留给前两关的新手缓冲（grace 已延展到全关，不能再用它开关）
+    const preflopBrake = grace >= .30 && h.street === 0 && !nutted && made < 1;
 
     if (toCall > 0 && effectiveStrength < foldThreshold) {
       return { action:'fold', tell: line(o, 'fold') };
     }
 
     if (!alreadyRaised && !preflopBrake && !trapWindow && (nutted || pressureWindow || bluffWindow)) {
-      const base = level.blind * (h.street + 2);
-      const mult = mercy ? (nutted ? 3.2 : 2.0) : (nutted ? 4.6 : (bluffWindow ? 2.7 : 3.4));
-      return { action:'raise', size: base * mult * (.75 + o.pressure), tell: bluffWindow ? line(o, 'bluff') : line(o, 'raise') };
+      // 下注尺寸改为底池比例（原版按 盲注×(街数+2)×倍率，河牌必然超过全部筹码）
+      const potNow = Math.max(h.pot, level.blind * 3);
+      const size = potNow * (.30 + o.pressure * .45 + level.difficulty * .18)
+                   * (nutted ? 1.15 : 1) * (bluffWindow ? .8 : 1);
+      return { action:'raise', size: Math.max(level.blind * 2, size), tell: bluffWindow ? line(o, 'bluff') : line(o, 'raise') };
     }
 
     return { action:'call', tell: trapWindow ? line(o, 'trap') : line(o, 'call') };
